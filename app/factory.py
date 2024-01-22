@@ -1,13 +1,14 @@
 import os
+from json import JSONEncoder
 
 from flask import Flask, render_template
-from flask.json import JSONEncoder
 from flask_cors import CORS
 
 
 from bson import json_util, ObjectId
 from datetime import datetime, timedelta
 
+from app.api.auth import auth_api_v1
 from app.api.test import test_api_v1
 
 
@@ -30,8 +31,12 @@ def create_app():
                 template_folder=TEMPLATE_FOLDER,
                 )
     CORS(app)
+
     app.json_encoder = MongoJsonEncoder
+
+    # Endpoints registration
     app.register_blueprint(test_api_v1)
+    app.register_blueprint(auth_api_v1)
 
     @app.route('/', defaults={'path': ''})
     @app.route('/<path:path>')

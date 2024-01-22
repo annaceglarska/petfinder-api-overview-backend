@@ -11,4 +11,6 @@ if __name__ == '__main__':
     app.config['DEBUG'] = True
     app.config['MONGO_URI'] = config['DEV']['DB_URI']
 
+    app.config['JWT_SECRET_KEY'] = config['DEV']['JWT_SECRET_KEY']
+
     app.run()

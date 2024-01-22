@@ -3,3 +3,5 @@
 3. Stworzyc połaczenie do bazy danych mongo
 4. Zapisywać i logować userów
 5. Stworzyć mechanizm wybierania przez usera zwierzaka
+
+6. Dodać dataclassy w modelach

@@ -13,11 +13,3 @@ def get_db():
 
 
 db = LocalProxy(get_db)
-
-
-def get_test():
-    try:
-        return list(db.test.find({}))
-
-    except Exception as e:
-        return e
