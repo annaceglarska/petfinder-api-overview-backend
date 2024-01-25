@@ -1,8 +1,11 @@
+import argon2
 import jwt
-from flask import Blueprint, request, current_app, app
+from flask import Blueprint, request, current_app, app, jsonify
 from flask_cors import CORS
 
+from app.middleware.auth import token_required
 from app.models.models import User
+from app.utils.exceptions import RequestException
 from app.utils.validators import validate_email_and_password
 
 auth_api_v1 = Blueprint(
@@ -24,7 +27,7 @@ def login():
         # validate input
         is_validated = validate_email_and_password(data.get('email'), data.get('password'))
         if is_validated is not True:
-            return {'message': 'Invalid data', 'data': None, 'error': is_validated}, 400
+            return {'message': 'Invalid data', 'data': None}, 400
         user = User().login(
             data["email"],
             data["password"]
@@ -57,3 +60,32 @@ def login():
                 "error": str(e),
                 "data": None
         }, 500
+
+
+@auth_api_v1.route('/create-hash', methods=['POST'])
+def create_hash():
+    try:
+        data = request.json
+        if not data:
+            raise RequestException("Not provided password.")
+        password = data.get("password")
+        if not password:
+            raise RequestException("Not provided password.")
+        hashed_password = argon2.PasswordHasher().hash('test')
+        data = {
+            'hash': hashed_password
+        }
+        return jsonify(data)
+    except Exception as e:
+        return {
+            "message": "Something went wrong!",
+            "error": str(e),
+            "data": None
+        }, 500
+
+
+@auth_api_v1.route('/create-user', methods=['POST'])
+def create_user():
+    return {
+        "message": "not implemented"
+    }, 501
