@@ -3,7 +3,6 @@ import jwt
 from flask import Blueprint, request, current_app, app, jsonify
 from flask_cors import CORS
 
-from app.middleware.auth import token_required
 from app.models.models import User
 from app.utils.exceptions import RequestException
 from app.utils.validators import validate_email_and_password
@@ -38,7 +37,7 @@ def login():
                 user["token"] = jwt.encode(
                     {"user_id": str(user["_id"])},
                     current_app.config["JWT_SECRET_KEY"],
-                    algorithm="HS256"
+                    algorithm="HS512"
                 )
                 return {
                     "message": "Successfully fetched auth token",
@@ -53,7 +52,7 @@ def login():
             "message": "Error fetching auth token!, invalid email or password",
             "data": None,
             "error": "Unauthorized"
-        }, 404
+        }, 401
     except Exception as e:
         return {
                 "message": "Something went wrong!",
@@ -82,10 +81,3 @@ def create_hash():
             "error": str(e),
             "data": None
         }, 500
-
-
-@auth_api_v1.route('/create-user', methods=['POST'])
-def create_user():
-    return {
-        "message": "not implemented"
-    }, 501

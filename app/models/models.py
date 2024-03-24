@@ -1,11 +1,10 @@
+import json
+import argon2
 from argon2.exceptions import VerifyMismatchError, VerificationError, InvalidHash
-from bson import ObjectId
-from mongoengine import Document, EmailField, UUIDField
-from mongoengine import StringField
-
-
 from argon2 import PasswordHasher
 from app.db import db
+from app.utils.exceptions import MissingAttributeException
+from bson import ObjectId
 
 
 def remove_sensitive_data_from_user_model(user, sensitive_keys):
@@ -16,8 +15,8 @@ def remove_sensitive_data_from_user_model(user, sensitive_keys):
 
 
 class ObjectBase:
-
-    def _get_element_by_id(self, id: str, collection: str):
+    @staticmethod
+    def _get_element_by_id(id: str, collection: str):
         try:
             object_id = ObjectId(id)
             return db[collection].find_one({'_id': object_id})
@@ -26,15 +25,30 @@ class ObjectBase:
             return e
 
 
-class User(Document, ObjectBase):
+class User(ObjectBase):
     COLLECTION = 'users'
     SENSITIVE_KEYS = ['hash']
 
-    def __init__(self):
-        super().__init__()
-
-    email = EmailField(unique=True)
-    hash = StringField()
+    @staticmethod
+    def add_user(user_raw_data):
+        try:
+            password = user_raw_data.get('password', None)
+            if not password:
+                raise MissingAttributeException('Missing attribute in user data', 'password')
+            hashed_password = argon2.PasswordHasher().hash(password)
+            user_data = {
+                'name': user_raw_data.get('name', None),
+                'surname': user_raw_data.get('surname', None),
+                'email': user_raw_data.get('email', None),
+                'phone': user_raw_data.get('phone', None),
+                'hash': hashed_password
+            }
+            result = db[User.COLLECTION].insert_one(user_data)
+            user = db[User.COLLECTION].find_one({'_id': result.inserted_id})
+            safe_data = remove_sensitive_data_from_user_model(user, User.SENSITIVE_KEYS)
+            return safe_data, None
+        except Exception as e:
+            return None, e
 
     def get_by_id(self, id: str):
         user_data = super()._get_element_by_id(id, self.COLLECTION)
@@ -57,9 +71,3 @@ class User(Document, ObjectBase):
                 return None
         except (VerifyMismatchError, VerificationError, InvalidHash) as e:
             return None
-
-
-
-
-
-
