@@ -1,5 +1,6 @@
 import argon2
 import jwt
+import requests
 from flask import Blueprint, request, current_app, app, jsonify
 from flask_cors import CORS
 
@@ -49,15 +50,15 @@ def login():
                     "message": str(e)
                 }, 500
         return {
-            "message": "Error fetching auth token!, invalid email or password",
+            "message": "Invalid email or password",
             "data": None,
             "error": "Unauthorized"
         }, 401
     except Exception as e:
         return {
-                "message": "Something went wrong!",
-                "error": str(e),
-                "data": None
+            "message": "Something went wrong!",
+            "error": str(e),
+            "data": None
         }, 500
 
 
@@ -81,3 +82,12 @@ def create_hash():
             "error": str(e),
             "data": None
         }, 500
+
+
+@auth_api_v1.route('/get-access', methods=["POST"])
+def get_access_to_app():
+    api_token_response = requests.post("https://api.petfinder.com/v2/oauth2/token",
+                                       auth=(current_app.config["PETFINDER_API_CLIENT_ID"], current_app.config["PETFINDER_API_SECRET_KEY"]),
+                                       data={'grant_type': 'client_credentials'})
+
+    return api_token_response.json(), api_token_response.status_code

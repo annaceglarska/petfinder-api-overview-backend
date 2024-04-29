@@ -12,5 +12,7 @@ if __name__ == '__main__':
     app.config['MONGO_URI'] = config['DEV']['DB_URI']
 
     app.config['JWT_SECRET_KEY'] = config['DEV']['JWT_SECRET_KEY']
+    app.config['PETFINDER_API_SECRET_KEY'] = config['DEV']['PETFINDER_API_SECRET_KEY']
+    app.config['PETFINDER_API_CLIENT_ID'] = config['DEV']['PETFINDER_API_CLIENT_ID']
 
     app.run()
