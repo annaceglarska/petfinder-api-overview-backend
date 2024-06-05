@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from flask_cors import CORS
 
+from app.middleware.auth import token_required
 from app.models.models import User
 
 user_api_v1 = Blueprint(
@@ -34,6 +35,42 @@ def create_user():
             return {
                 "message": "User created successfully.",
                 "data": user,
+            }, 201
+        else:
+            return {
+                "message": "Something went wrong!",
+                "error": str(error),
+                "data": None
+            }, 400
+
+    except Exception as e:
+        return {
+            "message": "Something went wrong!",
+            "error": str(e),
+            "data": None
+        }, 500
+
+
+@user_api_v1.route("/edit-user", methods=["POST"])
+@token_required
+def edit_user(user):
+    try:
+        data = request.json
+        if not data:
+            return {
+                "message": "Please provide user details",
+                "data": None,
+                "error": "Bad request"
+            }, 400
+
+        user_id = user.get("_id", None)
+        result, error = User.edit_user(data, user_id)
+
+        if result.acknowledged:
+            updated_user = User.get_by_id(user_id)
+            return {
+                "message": "User updated successfully.",
+                "data": updated_user,
             }, 201
         else:
             return {

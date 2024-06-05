@@ -28,7 +28,7 @@ def login():
         is_validated = validate_email_and_password(data.get('email'), data.get('password'))
         if is_validated is not True:
             return {'message': 'Invalid data', 'data': None}, 400
-        user = User().login(
+        user = User.login(
             data["email"],
             data["password"]
         )

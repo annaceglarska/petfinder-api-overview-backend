@@ -14,18 +14,16 @@ def remove_sensitive_data_from_user_model(user, sensitive_keys):
     return user
 
 
-class ObjectBase:
-    @staticmethod
-    def _get_element_by_id(id: str, collection: str):
-        try:
-            object_id = ObjectId(id)
-            return db[collection].find_one({'_id': object_id})
+def get_element_by_id(id: str, collection: str):
+    try:
+        object_id = ObjectId(id)
+        return db[collection].find_one({'_id': object_id})
 
-        except Exception as e:
-            return e
+    except Exception as e:
+        return e
 
 
-class User(ObjectBase):
+class User:
     COLLECTION = 'users'
     SENSITIVE_KEYS = ['hash']
 
@@ -50,13 +48,28 @@ class User(ObjectBase):
         except Exception as e:
             return None, e
 
-    def get_by_id(self, id: str):
-        user_data = super()._get_element_by_id(id, self.COLLECTION)
-        user = remove_sensitive_data_from_user_model(user_data, self.SENSITIVE_KEYS)
+    @staticmethod
+    def edit_user(user_row_data, user_id):
+        try:
+            user_data = {
+                'name': user_row_data.get('name', None),
+                'surname': user_row_data.get('surname', None),
+                'phone': user_row_data.get('phone', None)
+            }
+            result = db[User.COLLECTION].update_one({'_id': user_id}, {'$set': user_data})
+            return result, None
+
+        except Exception as e:
+            return None, e
+
+    @staticmethod
+    def get_by_id(id: str):
+        user_data = get_element_by_id(id, User.COLLECTION)
+        user = remove_sensitive_data_from_user_model(user_data, User.SENSITIVE_KEYS)
         return user
 
-    def login(self, email: str, password: str):
-        user_data = db[self.COLLECTION].find_one({'email': email})
+    def login(email: str, password: str):
+        user_data = db[User.COLLECTION].find_one({'email': email})
         if not user_data:
             return None
 
@@ -65,7 +78,7 @@ class User(ObjectBase):
         try:
             is_password_valid = ph.verify(user_data['hash'], password)
             if is_password_valid:
-                user = remove_sensitive_data_from_user_model(user_data, self.SENSITIVE_KEYS)
+                user = remove_sensitive_data_from_user_model(user_data, User.SENSITIVE_KEYS)
                 return user
             else:
                 return None
