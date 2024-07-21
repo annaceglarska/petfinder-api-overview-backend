@@ -20,8 +20,8 @@ The application requires a working frontend and defined environment variables to
 ## Technology stack
 
 - Flask
-- PyMongo
 - JWT
+- PyMongo
 - Werkzeug
 
 ## Contributing
