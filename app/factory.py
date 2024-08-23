@@ -7,9 +7,12 @@ from flask_cors import CORS
 from bson import ObjectId
 from datetime import datetime
 
+from flask_mail import Mail
+
 from app.api.auth import auth_api_v1
 from app.api.test import test_api_v1
 from app.api.user import user_api_v1
+from app.api.messages import message_api_v1
 
 
 class MongoJsonEncoder(DefaultJSONProvider):
@@ -32,6 +35,8 @@ def create_app():
     app = Flask(__name__, static_folder=STATIC_FOLDER,
                 template_folder=TEMPLATE_FOLDER,
                 )
+    mail = Mail(app)
+
     CORS(app)
 
     app.json = MongoJsonEncoder(app)
@@ -40,6 +45,7 @@ def create_app():
     app.register_blueprint(test_api_v1)
     app.register_blueprint(auth_api_v1)
     app.register_blueprint(user_api_v1)
+    app.register_blueprint(message_api_v1)
 
     @app.route('/', defaults={'path': ''})
     @app.route('/<path:path>')
