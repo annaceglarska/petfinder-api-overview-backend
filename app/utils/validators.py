@@ -28,6 +28,6 @@ def validate_email(email: str) -> bool:
 
 
 def validate_phone_number(phone: str) -> bool:
-    phone_regex = r"(\+[0-9]{2})?[0-9]{9}"
+    phone_regex = r"^\+?[0-9]{2}?[0-9]{9}$"
     match = re.match(phone_regex, phone)
     return bool(match)

@@ -64,9 +64,12 @@ class User:
 
     @staticmethod
     def get_by_id(id: str):
-        user_data = get_element_by_id(id, User.COLLECTION)
-        user = remove_sensitive_data_from_user_model(user_data, User.SENSITIVE_KEYS)
-        return user
+        try:
+            user_data = get_element_by_id(id, User.COLLECTION)
+            user = remove_sensitive_data_from_user_model(user_data, User.SENSITIVE_KEYS)
+            return user, None
+        except Exception as e:
+            return None, e
 
     def login(email: str, password: str):
         user_data = db[User.COLLECTION].find_one({'email': email})

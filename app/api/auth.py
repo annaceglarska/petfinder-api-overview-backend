@@ -1,3 +1,5 @@
+import datetime
+
 import argon2
 import jwt
 import requests
@@ -32,11 +34,16 @@ def login():
             data["email"],
             data["password"]
         )
+
         if user:
             try:
-                # token should expire after 24 hrs
+                # token_life_time_min = 15
+                # expiration_time = datetime.datetime.utcnow() + datetime.timedelta(minutes=token_life_time_min)
+                # exp_timestamp = int(expiration_time.timestamp())
                 user["token"] = jwt.encode(
-                    {"user_id": str(user["_id"])},
+                    {"user_id": str(user["_id"])
+                        # , "exp": exp_timestamp
+                     },
                     current_app.config["JWT_SECRET_KEY"],
                     algorithm="HS512"
                 )

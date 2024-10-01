@@ -85,3 +85,32 @@ def edit_user(user):
             "error": str(e),
             "data": None
         }, 500
+
+
+@user_api_v1.route("/get-user", methods=["GET"])
+@token_required
+def get_user(user_data):
+    try:
+        user, error = user_data
+        if error and not user:
+            return {
+                "message": "Something went wrong!",
+                "error": str(error),
+                "data": None
+            }, 400
+        if user:
+            return {
+                "message": "User updated successfully.",
+                "data": user,
+            }, 200
+        return {
+            "message": "Something went wrong!",
+            "data": None
+        }, 400
+
+    except Exception as e:
+        return {
+            "message": "Something went wrong!",
+            "error": str(e),
+            "data": None
+        }, 500
