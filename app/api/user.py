@@ -1,5 +1,6 @@
 from flask import Blueprint, request, jsonify
 from flask_cors import CORS
+from werkzeug.exceptions import UnsupportedMediaType
 
 from app.middleware.auth import token_required
 from app.models.models import User
@@ -42,6 +43,12 @@ def create_user():
                 "error": str(error),
                 "data": None
             }, 400
+    except UnsupportedMediaType as e:
+        return {
+            "message": "Unsupported media type!",
+            "error": str(e),
+            "data": None
+        }, 415
 
     except Exception as e:
         return {
